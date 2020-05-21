@@ -7,43 +7,30 @@ from datetime import datetime
 import time
 import os
 import requests
-
+from response import okay_response, fail_response
 from apscheduler.schedulers.background import BackgroundScheduler
 
 health_url = "http://localhost:5000/user/health"
-slack_url = "https://hooks.slack.com/services/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"
+slack_url = "https://hooks.slack.com/services/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"
 
-fail_response = {
-    "attachments": [
-        {
-            "fallback": "Required plain-text summary of the attachment.",
-            "color": "#8B0000",
-            "text": "API not reachable",
-            "fields": [
-                {
-                    "title": "Severity",
-                    "value": "High",
-                    "short": False
-                }
-            ],
-            "footer": "Slack API",
-            "ts": 123456789
-        }
-    ]
-}
+
 headers = {
     'Content-Type': 'application/json'
 }
 
 
 def health_check():
-    response = requests.request("POST", slack_url, headers=headers, json=fail_response)
-    print(response)
+    response = requests.request("GET", health_url, headers={})
+    if response.status_code != 200:
+        requests.request("POST", slack_url, headers=headers, json=fail_response)
+    else:
+        response= requests.request("POST", slack_url, headers=headers, json=okay_response)
+        print(response)
 
 
 if __name__ == '__main__':
     scheduler = BackgroundScheduler()
-    scheduler.add_job(health_check, 'interval', seconds=5)
+    scheduler.add_job(health_check, 'interval', minutes=1)
     scheduler.start()
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
