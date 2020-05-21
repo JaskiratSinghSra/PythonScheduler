@@ -7,17 +7,22 @@ intervals.
 from datetime import datetime
 import time
 import os
+import requests
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
+health_url = "http://localhost:5000/user/health"
 
-def tick():
-    print('Tick! The time is: %s' % datetime.now())
+
+def health_check():
+    print(datetime.now())
+    response = requests.request("GET", health_url)
+    print(response.status_code)
 
 
 if __name__ == '__main__':
     scheduler = BackgroundScheduler()
-    scheduler.add_job(tick, 'interval', seconds=3)
+    scheduler.add_job(health_check, 'interval', seconds=5)
     scheduler.start()
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
