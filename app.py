@@ -1,4 +1,3 @@
-
 """
 Demonstrates how to use the background scheduler to schedule a job that executes on 3 second
 intervals.
@@ -12,12 +11,34 @@ import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 
 health_url = "http://localhost:5000/user/health"
+slack_url = "https://hooks.slack.com/services/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"
+
+fail_response = {
+    "attachments": [
+        {
+            "fallback": "Required plain-text summary of the attachment.",
+            "color": "#8B0000",
+            "text": "API not reachable",
+            "fields": [
+                {
+                    "title": "Severity",
+                    "value": "High",
+                    "short": False
+                }
+            ],
+            "footer": "Slack API",
+            "ts": 123456789
+        }
+    ]
+}
+headers = {
+    'Content-Type': 'application/json'
+}
 
 
 def health_check():
-    print(datetime.now())
-    response = requests.request("GET", health_url)
-    print(response.status_code)
+    response = requests.request("POST", slack_url, headers=headers, json=fail_response)
+    print(response)
 
 
 if __name__ == '__main__':
